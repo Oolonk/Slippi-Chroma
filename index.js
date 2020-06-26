@@ -51,7 +51,9 @@ const stream = new SlpFolderStream();
 const wss = new WebSocket.Server({ port: 8080 });
 wss.on("connection", (client) => {
   console.log("Client connected!");
-  client.send( JSON.stringify({start: start,}));
+  client.send( JSON.stringify({start: start,
+  leftcolor: leftcolor,
+  rightcolor: rightcolor}));
 
 
 
@@ -69,9 +71,6 @@ const sendUpdate = (data) => {
 // Add the combos to the queue whenever we detect them
 const realtime = new SlpRealTime();
 realtime.setStream(stream);
-realtime.game.start$.subscribe(() => {
-  console.log(`Detected a new game in ${stream.getCurrentFilename()}`);
-});
 realtime.game.start$.subscribe((payload) => {
   isTeams = payload.isTeams;
   players = payload.players;
@@ -132,6 +131,7 @@ if (players[0].teamId == players[1].teamId) {
 });
 realtime.game.end$.subscribe((payload) => {
     var player;
+    console.log("Game!");
     console.log(payload.winnerPlayerIndex);
   if (isTeams == true) {
 
@@ -155,13 +155,13 @@ realtime.game.end$.subscribe((payload) => {
           player = [127, 127, 127];
     }
 
+      start = false;
     sendUpdate(
     JSON.stringify({
       event: "winner",
       player: player,
     })
   );
-    start = false
   });
 
 realtime.stock.playerDied$.subscribe((payload) => {
