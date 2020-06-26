@@ -1,4 +1,25 @@
-/*
+const { app, BrowserWindow } = require('electron')
+
+function createWindow () {
+  // Erstelle das Browser-Fenster.
+  let win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  })
+
+  // und lade die index.html der App.
+  win.loadFile('index.html')
+}
+
+app.whenReady().then(createWindow)
+
+
+
+
+  /*
 This example script connects to a relay, automatically detects combos,
 and generates a Dolphin-compatible `combos.json` file when disconnected
 from the relay.
@@ -7,41 +28,23 @@ from the relay.
 const WebSocket = require("ws");
 const fs = require("fs");
 const { tap, map, filter } = require("rxjs/operators");
-
+var leftcolor;
+var rightcolor;
 var start = false;
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { ConnectionStatus, SlpLiveStream, SlpRealTime, ComboFilter, generateDolphinQueuePayload } = require("@vinceau/slp-realtime");
+const { SlpFolderStream, ConnectionStatus, Slpstream, SlpRealTime, ComboFilter, generateDolphinQueuePayload } = require("@vinceau/slp-realtime");
 
+// TODO: Make sure you set this value!
+const slpLiveFolderPath = "C:\\Emulation\\Emulatoren\\Slippi Online\\Slippi";
+console.log(`Monitoring ${slpLiveFolderPath} for new SLP files`);
 // TODO: Make sure you set these values!
-const ADDRESS = "localhost";  // leave as is if the relay is on the same computer
-const PORT = 53742;            // relay port
-
-const outputCombosFile = "combos.json";   // The json file to write combos to
-var isTeams;
-var players;
-const comboQueue = [];  // Tracks the combos to be written
-
-
 // Connect to the relay
-const livestream = new SlpLiveStream({
-  outputFiles: false,  // Write out slp files so we can reference them in the dolphin json file
-});
 
-// connect to the livestream
-livestream.start(ADDRESS, PORT)
-  .then(() => {
-    console.log("Connected to Slippi Relay");
-  })
-  .catch(console.error);
 
-// Write out the files when we've been disconnected
-livestream.connection.on("statusChange", (status) => {
-  if (status === ConnectionStatus.DISCONNECTED) {
-    console.log("Disconnected from the relay.");
-  }
-});
+const stream = new SlpFolderStream();
+
 
 
 
@@ -65,14 +68,63 @@ const sendUpdate = (data) => {
 
 // Add the combos to the queue whenever we detect them
 const realtime = new SlpRealTime();
-realtime.setStream(livestream);
-
+realtime.setStream(stream);
+realtime.game.start$.subscribe(() => {
+  console.log(`Detected a new game in ${stream.getCurrentFilename()}`);
+});
 realtime.game.start$.subscribe((payload) => {
   isTeams = payload.isTeams;
   players = payload.players;
+
+  if (isTeams == true) {
+
+  if (players[0].teamId == 0)
+    leftcolor = [241, 89, 89];
+  else if (players[0].teamId == 1)
+    leftcolor = [101, 101, 254];
+  else
+    leftcolor = [76, 228, 76];
+var z = 1;
+if (players[0].teamId == players[1].teamId) {
+  z = 2;
+}
+
+      if (players[z].teamId == 0)
+        rightcolor = [241, 89, 89];
+      else if (players[z].teamId == 1)
+        rightcolor = [101, 101, 254];
+      else
+        rightcolor = [76, 228, 76];
+
+    } else {
+      if (players[0].port == 1)
+        leftcolor = [241, 89, 89];
+      else if (players[0].port == 2)
+        leftcolor = [101, 101, 254];
+      else if (players[0].port == 3)
+        leftcolor = [254, 190, 63];
+      else if (players[0].port == 4)
+        leftcolor = [76, 228, 76];
+      else
+        leftcolor = [127, 127, 127];
+
+
+          if (players[1].port == 1)
+            rightcolor = [241, 89, 89];
+          else if (players[1].port == 2)
+            rightcolor = [101, 101, 254];
+          else if (players[1].port == 3)
+            rightcolor = [254, 190, 63];
+          else if (players[1].port == 4)
+            rightcolor = [76, 228, 76];
+          else
+            rightcolor = [127, 127, 127];
+  }
   sendUpdate(
     JSON.stringify({
       event: "start",
+      leftcolor: leftcolor,
+      rightcolor: rightcolor
     })
   );
   start = true;
@@ -165,9 +217,10 @@ realtime.stock.playerDied$.subscribe((payload) => {
 // realtime.combo.end$.subscribe(payload => {
 //   if (comboFilter.isCombo(payload.combo, payload.settings)) {
 //     console.log("Detected combo!");
-//     const filename = livestream.getCurrentFilename();
+//     const filename = stream.getCurrentFilename();
 //     if (filename) {
 //       comboQueue.push({path: filename, combo: payload.combo});
 //     }
 //   }
 // });
+stream.start(slpLiveFolderPath);
