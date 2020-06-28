@@ -6,6 +6,8 @@
     <title></title>
     <script type="text/javascript" src="script/jquery.js"></script>
     <script type="text/javascript">
+    var ipc = require('electron').ipcRenderer;
+
     var leftcolor = 0;
     var rightcolor = 0;
     var updating2 = false;
@@ -668,7 +670,15 @@ var cyclingto = "red"
         }
         return true;
       }
+ function checkbox(checked){
+   if (checked) {
 
+       chromaSDK.init();
+   } else {
+     chromaSDK.uninit();
+
+   }
+ }
 
         function changecolor(i){
           var time = 20 * i;
@@ -686,7 +696,10 @@ var cyclingto = "red"
         }
     </script>
   </head>
-  <body onload="onPageLoad()" onunload="onPageUnload()">
-
+  <body onload="onPageLoad()" onunload="onPageUnload()" style="background-color: rgba(0, 0, 0, 0);color: white;">
+    <center>
+    <input type="checkbox" name="" onclick="checkbox(this.checked);" checked id="lol">
+    <span style="color: white;">Razer Chroma LED Toggle</span>
+  </center>
   </body>
 </html>

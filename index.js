@@ -1,23 +1,54 @@
-const { app, BrowserWindow } = require('electron')
+const { app, Menu, Tray, electron } = require('electron')
+const { BrowserWindow } = require('electron')
+var ipc = require('electron').ipcMain;
+var url = require('url')
+var path = require('path')
+function createWindow() {
+    let win = new BrowserWindow({ backgroundColor: '#2e2c29', width: 600, height: 600, icon:  __dirname + '\\script\\icon.ico', frame: true, resizable : false,webPreferences: {nodeIntegration: true}})
 
-function createWindow () {
-  // Erstelle das Browser-Fenster.
-  let win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true
-    }
+    win.loadURL(url.format({
+        pathname: path.join( __dirname + '\\index.html'),
+    }))
+
+    var appIcon = new Tray( __dirname + '\\script\\icon.ico')
+
+    var contextMenu = Menu.buildFromTemplate([
+        {
+            label: 'Show App', click: function () {
+                win.show()
+            }
+        },
+        {
+            label: 'Quit', click: function () {
+                app.isQuiting = true
+                app.quit()
+            }
+        }
+    ])
+
+    appIcon.setToolTip('Slippi Chroma');
+
+    appIcon.setContextMenu(contextMenu);
+  appIcon.on('right-click', () => {
+    appIcon.popUpContextMenu();
   })
+  appIcon.on('click', () => {
+      win.show()
+  });
 
-  // und lade die index.html der App.
-  win.loadFile('index.html')
+    win.on('close', function (event) {
+        win = null
+    })
+
+    win.on('minimize', function (event) {
+        event.preventDefault()
+        win.hide()
+    })
+
 }
+app.commandLine.appendSwitch("disable-gpu")
 
-app.whenReady().then(createWindow)
-
-
-
+app.on('ready', createWindow)
 
   /*
 This example script connects to a relay, automatically detects combos,
