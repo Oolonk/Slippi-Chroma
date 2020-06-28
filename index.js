@@ -2,16 +2,18 @@ const { app, Menu, Tray, electron } = require('electron')
 const { BrowserWindow } = require('electron')
 var ipc = require('electron').ipcMain;
 var url = require('url')
+const fs = require("fs")
 var path = require('path')
+const WebSocket = require("ws")
+const { tap, map, filter } = require("rxjs/operators")
 function createWindow() {
-    let win = new BrowserWindow({ backgroundColor: '#2e2c29', width: 600, height: 600, icon:  __dirname + '\\script\\icon.ico', frame: true, resizable : false,webPreferences: {nodeIntegration: true}})
-
+    let win = new BrowserWindow({ backgroundColor: '#2e2c29', width: 1200, height: 700, icon:  __dirname + '\\script\\icon.ico', frame: true, resizable : false,webPreferences: {nodeIntegration: true}})
+    win.setMenuBarVisibility(false)
     win.loadURL(url.format({
         pathname: path.join( __dirname + '\\index.html'),
     }))
 
     var appIcon = new Tray( __dirname + '\\script\\icon.ico')
-
     var contextMenu = Menu.buildFromTemplate([
         {
             label: 'Show App', click: function () {
@@ -56,9 +58,6 @@ and generates a Dolphin-compatible `combos.json` file when disconnected
 from the relay.
 */
 
-const WebSocket = require("ws");
-const fs = require("fs");
-const { tap, map, filter } = require("rxjs/operators");
 var leftcolor;
 var rightcolor;
 var start = false;

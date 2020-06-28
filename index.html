@@ -7,6 +7,10 @@
     <script type="text/javascript" src="script/jquery.js"></script>
     <script type="text/javascript">
     var ipc = require('electron').ipcRenderer;
+    var fs = require('fs');
+
+    var folder;
+
 
     var leftcolor = 0;
     var rightcolor = 0;
@@ -671,6 +675,9 @@ var cyclingto = "red"
         return true;
       }
  function checkbox(checked){
+  fs.writeFile('razer.txt', checked.toString(), function(err, result) {
+     if(err) console.log('error', err);
+   });
    if (checked) {
 
        chromaSDK.init();
@@ -694,11 +701,53 @@ var cyclingto = "red"
               leftcolor = red1 + green1 * 256 + blue1 * 65536;
             }, time);
         }
+
+
+
+         fs.readFile('razer.txt', 'utf8', function (err, data) {
+           if (data == "true") {
+             document.getElementById("lol").checked = true;
+             checkbox(true);
+           } else {
+             document.getElementById("lol").checked = false;
+             checkbox(false);
+
+           }
+         });
+
+         function folder(value){
+           value = value.substr(0, value.lastIndexOf("\\"));
+          folder = data;
+          document.getElementById("span").textContent = value;
+         fs.writeFile('folder.txt', value, function(err, result) {
+         if(err) console.log('error', err);
+         });
+         }
+
+         fs.readFile('folder.txt', 'utf8', function (err, data) {
+            folder = data;
+            document.getElementById("span").textContent = data;
+        });
+
     </script>
   </head>
   <body onload="onPageLoad()" onunload="onPageUnload()" style="background-color: rgba(0, 0, 0, 0);color: white;">
     <center>
-    <input type="checkbox" name="" onclick="checkbox(this.checked);" checked id="lol">
+      <table style="width: 100%">
+        <tr>
+          <th style="width: 50%; font-weight: normal; vertical-align:top;">
+            Inspect folder<br/>
+            File Folder:<span id="span"></span><br/>
+            <button><label for="saas">Change Folder</label></button><input type="file" id="saas" name="saas" webkitdirectory onchange="folder(this.files[0].path);" style="display: none;"/>
+          </th>
+          <th style="width: 50%; font-weight: normal; vertical-align:top;">
+            Wii Relay
+        </th>
+        </tr>
+      </table>
+  <div style="width: 50%">
+  </div>
+    <input type="checkbox" name="" onclick="checkbox(this.checked);" id="lol">
     <span style="color: white;">Razer Chroma LED Toggle</span>
   </center>
   </body>
