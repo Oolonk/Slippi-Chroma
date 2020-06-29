@@ -7,7 +7,7 @@ var path = require('path')
 const WebSocket = require("ws")
 const { tap, map, filter } = require("rxjs/operators")
 function createWindow() {
-    let win = new BrowserWindow({ backgroundColor: '#2e2c29', width: 1200, height: 700, icon:  __dirname + '\\script\\icon.ico', frame: true, resizable : false,webPreferences: {nodeIntegration: true}})
+    let win = new BrowserWindow({ backgroundColor: '#2e2c29', width: 1200, height: 700, icon:  __dirname + '\\script\\icon.ico', frame: false, resizable : false,webPreferences: {nodeIntegration: true}})
     //win.setMenuBarVisibility(false)
     win.loadURL(url.format({
         pathname: path.join( __dirname + '\\index.html'),
