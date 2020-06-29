@@ -8,7 +8,7 @@ const WebSocket = require("ws")
 const { tap, map, filter } = require("rxjs/operators")
 function createWindow() {
     let win = new BrowserWindow({ backgroundColor: '#2e2c29', width: 1200, height: 700, icon:  __dirname + '\\script\\icon.ico', frame: true, resizable : false,webPreferences: {nodeIntegration: true}})
-    win.setMenuBarVisibility(false)
+    //win.setMenuBarVisibility(false)
     win.loadURL(url.format({
         pathname: path.join( __dirname + '\\index.html'),
     }))
@@ -46,7 +46,6 @@ function createWindow() {
         event.preventDefault()
         win.hide()
     })
-
 }
 app.commandLine.appendSwitch("disable-gpu")
 
@@ -64,7 +63,7 @@ var start = false;
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { SlpFolderStream, ConnectionStatus, Slpstream, SlpRealTime, ComboFilter, generateDolphinQueuePayload } = require("@vinceau/slp-realtime");
+const { SlpFolderStream, SlpLiveStream, ConnectionStatus, Slpstream, SlpRealTime, ComboFilter, generateDolphinQueuePayload } = require("@vinceau/slp-realtime");
 
 // TODO: Make sure you set this value!
 const slpLiveFolderPath = "C:\\Emulation\\Emulatoren\\Slippi Online\\Slippi";
@@ -74,6 +73,7 @@ console.log(`Monitoring ${slpLiveFolderPath} for new SLP files`);
 
 
 const stream = new SlpFolderStream();
+const stream2 = new SlpLiveStream();
 
 
 
@@ -253,4 +253,26 @@ realtime.stock.playerDied$.subscribe((payload) => {
 //     }
 //   }
 // });
-stream.start(slpLiveFolderPath);
+ipc.on('start', (event, lolistgut) => {
+  if (lolistgut[0] == "Relay") {
+  realtime.setStream(stream2);
+    stream2.start("localhost", lolistgut[1])
+      .then(() => {
+        console.log("Successfully connected!");
+      })
+      .catch(console.error);
+
+
+  } else {
+  realtime.setStream(stream);
+  console.log(lolistgut[2]);
+  console.log(lolistgut);
+  stream.start(lolistgut[2]);
+    console.log("starting monitoring!");
+
+  }
+})
+ipc.on('end', (event, arg) => {
+stream.stop();
+stream2.stop();
+})

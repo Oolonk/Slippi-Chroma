@@ -4,28 +4,48 @@
   <script src="script/Chroma.js"></script>
     <meta charset="utf-8">
     <title></title>
+    <link rel="stylesheet" href="script/styles.css">
     <script type="text/javascript" src="script/jquery.js"></script>
     <script type="text/javascript" src="js.js">
     </script>
   </head>
-  <body onload="onPageLoad()" onunload="onPageUnload()" style="background-color: rgba(0, 0, 0, 0);color: white;">
-    <center>
+  <body onload="onPageLoad()" onunload="onPageUnload()" style="background-color: rgba(0, 0, 0, 0);color: white; margin: 0">
+  <center>
+    <table style="width: 100%">
+      <tr>
+        <th style="width: 50%; font-weight: normal; vertical-align:top;">
+          <img src="script/Wii.svg" alt="" style="width: 20%; border-width: 2px; border-style: solid" id="WiiIMG" onclick="type('Relay');" /><br/>
+          <span>Wii Relay</span>
+        </th>
+        <th style="width: 50%; font-weight: normal; vertical-align:top;">
+          <img src="script/Dolphin.svg" alt="" style="width: 20%; border-width: 2px; border-style: solid" id="DolphinIMG" onclick="type('Folder');" /><br/>
+          <span></span>Inspect Folder
+        </th>
+      </tr>
+    </table>
+    <span id="DolphinSpan">
+      Inspect folder
+      <input type="text" name="" value="" id="folder" onchange="folder(this.value)"><br/>
+      <button><label for="saas">Change Folder</label></button><input type="file" id="saas" name="saas" webkitdirectory onchange="folder(this.files[0].path)" style="display: none;"/>
+    </span>
+    <span id="WiiSpan">
+      Wii Relay
+      <input type="number" name="relayPort" id="relayPort" min="0" max="65535" onchange="relay(this.value)">
+    </span>
       <table style="width: 100%">
         <tr>
-          <th style="width: 50%; font-weight: normal; vertical-align:top;">
-            Inspect folder<br/>
-            File Folder:<span id="span"></span><br/>
-            <button><label for="saas">Change Folder</label></button><input type="file" id="saas" name="saas" webkitdirectory onchange="folder(this.files[0].path)" style="display: none;"/>
           </th>
           <th style="width: 50%; font-weight: normal; vertical-align:top;">
-            Wii Relay
         </th>
         </tr>
       </table>
   <div style="width: 50%">
   </div>
     <input type="checkbox" name="" onclick="checkbox(this.checked);" id="lol">
-    <span style="color: white;">Razer Chroma LED Toggle</span>
+    <span style="color: white;">Razer Chroma LED Toggle</span><br/>
+      <input type="checkbox" name="" onclick="auto(this.checked);" id="auto">
+      <span style="color: white;">Autoconnect Monitoring</span><br/>
+      <button type="button" name="button" id="startbutton" onclick="start()">Start Monitoring</button><button type="button" name="button" id="stopbutton" onclick="stop()">Stop Monitoring</button>
   </center>
   </body>
 </html>

@@ -4,7 +4,8 @@ var fs = require('fs');
 const remote = require('electron').remote;
 const app = remote.app;
 var foldervar;
-
+var relay;
+var decision;
 
 var leftcolor = 0;
 var rightcolor = 0;
@@ -28,7 +29,6 @@ function onPageLoad() {
           ((parts[0] > 2) ||
           (parts[0] == 2 && parts[1] > 14) ||
           (parts[0] == 2 && parts[1] == 14 && parts[2] >= 0))) {
-            chromaSDK.init();
           } else {
             $("#divUpdateChromaSDK").show();
           }
@@ -673,9 +673,10 @@ fs.writeFile( app.getPath('userData') + '\\saves\\razer.txt', checked.toString()
  if(err) console.log('error', err);
  console.log('write file folder', err);
 });
-if (checked) {
+if (checked == true) {
 
    chromaSDK.init();
+   console.log("chroma started");
 } else {
  chromaSDK.uninit();
 
@@ -699,32 +700,114 @@ if (checked) {
 
 
 
-     fs.readFile( app.getPath('userData') + '\\saves\\razer.txt', 'utf8', function (err, data) {
-       if (data == "true") {
-         document.getElementById("lol").checked = true;
-         checkbox(true);
-       } else {
-         document.getElementById("lol").checked = false;
-         checkbox(false);
-
-       }
-     });
 
      function folder(value){
+       if (value.includes('.')) {
        value = value.substr(0, value.lastIndexOf("\\"));
+       }
       foldervar = data;
-      document.getElementById("span").textContent = value;
+      document.getElementById("folder").value = value;
      fs.writeFile( app.getPath('userData') + '\\saves\\folder.txt', value, function(err, result) {
      if(err) console.log('error', err);
      });
      }
 
-     fs.readFile( app.getPath('userData') + '\\saves\\folder.txt', 'utf8', function (err, data) {
-        foldervar = data;
-        document.getElementById("span").textContent = foldervar;
-    });
-
     if (!fs.existsSync(app.getPath('userData') + '\\saves\\')){
         fs.mkdirSync(app.getPath('userData') + '\\saves\\');
         console.log("Directory erstellt");
     }
+    function type(type){
+      decision = type;
+      fs.writeFile( app.getPath('userData') + '\\saves\\type.txt', type, function(err, result) {
+        if(err) console.log('error', err);
+        if (type == "Relay") {
+          document.getElementById("WiiSpan").style.display = "block";
+          document.getElementById("DolphinSpan").style.display = "none";
+
+
+          document.getElementById("WiiIMG").style.borderColor = "rgba(153, 153, 153, 1)";
+          document.getElementById("DolphinIMG").style.borderColor = "rgba(70, 212, 255, .25)";
+
+        } else {
+            document.getElementById("DolphinSpan").style.display = "block";
+            document.getElementById("WiiSpan").style.display = "none";
+                      document.getElementById("WiiIMG").style.borderColor = "rgba(153, 153, 153, .25)";
+                      document.getElementById("DolphinIMG").style.borderColor = "rgba(70, 212, 255, 1)";
+        }
+      });
+    }
+
+    function relay(value){
+      relay = value;
+      fs.writeFile( app.getPath('userData') + '\\saves\\relay.txt', value, function(err, result) {
+        if(err) console.log('error', err);
+      });
+    }
+
+
+    fs.readFile( app.getPath('userData') + '\\saves\\relay.txt', 'utf8', function (err, data) {
+      if(err) console.log('error', err);
+      relay = parseInt(data);
+      document.getElementById("relayPort").value = relay;
+    });
+
+    fs.readFile( app.getPath('userData') + '\\saves\\razer.txt', 'utf8', function (err, data) {
+      if (data == "true") {
+        document.getElementById("lol").checked = true;
+        checkbox(true);
+      } else {
+        document.getElementById("lol").checked = false;
+        checkbox(false);
+      }
+    });
+
+    fs.readFile( app.getPath('userData') + '\\saves\\folder.txt', 'utf8', function (err, data) {
+    foldervar = data;
+    document.getElementById("folder").value = foldervar;
+    });
+
+    fs.readFile( app.getPath('userData') + '\\saves\\type.txt', 'utf8', function (err, data) {
+      if (data == null) {
+        decision = 'Folder';
+          data = 'Folder';
+        fs.writeFile( app.getPath('userData') + '\\saves\\type.txt', 'Folder', function(err, result) {
+          if(err) console.log('error', err);
+        });
+      }
+    type(data);
+    });
+
+    function auto(value){
+      fs.writeFile( app.getPath('userData') + '\\saves\\auto.txt', value.toString(), function(err, result) {
+        if(err) console.log('error', err);
+      });
+  }
+
+function start(){
+  var value = {
+    decision: decision,
+    relay: relay,
+    folder: foldervar
+  };
+  ipc.send('start', [decision, relay, foldervar]);
+    document.getElementById('startbutton').style.display = 'none';
+      document.getElementById('stopbutton').style.display = 'block';
+}
+function stop(){
+
+  ipc.send('stop', "value")
+    document.getElementById('startbutton').style.display = 'block';
+      document.getElementById('stopbutton').style.display = 'none';
+}
+
+
+fs.readFile( app.getPath('userData') + '\\saves\\auto.txt', 'utf8', function (err, data) {
+  if (data == "true") {
+    start();
+    document.getElementById("auto").checked = true;
+  } else {
+    document.getElementById('startbutton').style.display = 'block';
+      document.getElementById('stopbutton').style.display = 'none';
+  }
+type(data);
+});
