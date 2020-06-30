@@ -5,10 +5,11 @@ var url = require('url')
 const fs = require("fs")
 var path = require('path')
 const WebSocket = require("ws")
+var payloadvar;
 const { tap, map, filter } = require("rxjs/operators")
 function createWindow() {
-    let win = new BrowserWindow({ backgroundColor: '#2e2c29', width: 1200, height: 700, icon:  __dirname + '\\script\\icon.ico', frame: false, resizable : false,webPreferences: {nodeIntegration: true}})
-    //win.setMenuBarVisibility(false)
+    let win = new BrowserWindow({ backgroundColor: '#2e2c29', width: 1200, height: 700, icon:  __dirname + '\\script\\icon.ico', frame: true, resizable : false,webPreferences: {nodeIntegration: true}})
+    win.setMenuBarVisibility(false)
     win.loadURL(url.format({
         pathname: path.join( __dirname + '\\index.html'),
     }))
@@ -81,9 +82,12 @@ const stream2 = new SlpLiveStream();
 const wss = new WebSocket.Server({ port: 8080 });
 wss.on("connection", (client) => {
   console.log("Client connected!");
-  client.send( JSON.stringify({start: start,
+  client.send( JSON.stringify({
+    start: start,
   leftcolor: leftcolor,
-  rightcolor: rightcolor}));
+  rightcolor: rightcolor,
+  payload: payloadvar
+}));
 
 
 
@@ -153,7 +157,8 @@ if (players[0].teamId == players[1].teamId) {
     JSON.stringify({
       event: "start",
       leftcolor: leftcolor,
-      rightcolor: rightcolor
+      rightcolor: rightcolor,
+      payload: payload
     })
   );
   start = true;
@@ -188,8 +193,9 @@ realtime.game.end$.subscribe((payload) => {
       start = false;
     sendUpdate(
     JSON.stringify({
-      event: "winner",
+      event: "end",
       player: player,
+      payload: payload
     })
   );
   });
@@ -238,6 +244,7 @@ realtime.stock.playerDied$.subscribe((payload) => {
     event: "died",
     player: player,
     opponent: opponent,
+    payload: payload
   })
 );
 });

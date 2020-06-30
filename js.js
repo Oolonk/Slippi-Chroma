@@ -603,6 +603,7 @@ setTimeout(function(){
 
       ws.onmessage = function (e) {
           console.log('Message:', e.data);
+              console.log('Message:', e.data.payload);
           data = JSON.parse(e.data);
           if (data.event == "start" || data.start) {
             ingame = true;
@@ -618,7 +619,7 @@ setTimeout(function(){
           } else if (data.start === false) {
             ingame = false;
           }
-          if (data.event == "winner") {
+          if (data.event == "end") {
             if (arraysEqual(data.player, piioleftcolor)) {
               playerwon(1);
             }else if (arraysEqual(data.player, piiorightcolor)) {
@@ -775,6 +776,17 @@ if (checked == true) {
         });
       }
     type(data);
+
+    fs.readFile( app.getPath('userData') + '\\saves\\auto.txt', 'utf8', function (err, data) {
+      if (data == "true") {
+        start();
+        document.getElementById("auto").checked = true;
+      } else {
+        document.getElementById('startbutton').style.display = 'block';
+          document.getElementById('stopbutton').style.display = 'none';
+      }
+    type(data);
+    });
     });
 
     function auto(value){
@@ -799,15 +811,3 @@ function stop(){
     document.getElementById('startbutton').style.display = 'block';
       document.getElementById('stopbutton').style.display = 'none';
 }
-
-
-fs.readFile( app.getPath('userData') + '\\saves\\auto.txt', 'utf8', function (err, data) {
-  if (data == "true") {
-    start();
-    document.getElementById("auto").checked = true;
-  } else {
-    document.getElementById('startbutton').style.display = 'block';
-      document.getElementById('stopbutton').style.display = 'none';
-  }
-type(data);
-});
