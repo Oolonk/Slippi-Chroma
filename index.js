@@ -2,6 +2,8 @@ const { app, Menu, Tray, electron } = require('electron')
 const { BrowserWindow } = require('electron')
 var ipc = require('electron').ipcMain;
 var url = require('url')
+var express = require('express');
+const { default: SlippiGame } = require('@slippi/slippi-js')
 const fs = require("fs")
 var path = require('path')
 const WebSocket = require("ws")
@@ -47,7 +49,15 @@ function createWindow() {
         event.preventDefault()
         win.hide()
     })
+
+        fs.readFile( app.getPath('userData') + '\\saves\\autohide.txt', 'utf8', function (err, data) {
+          if(err) console.log('error', err);
+          if (data == "true") {
+              win.hide()
+          }
+        });
 }
+
 app.commandLine.appendSwitch("disable-gpu")
 
 app.on('ready', createWindow)
@@ -67,8 +77,7 @@ var start = false;
 const { SlpFolderStream, SlpLiveStream, ConnectionStatus, Slpstream, SlpRealTime, ComboFilter, generateDolphinQueuePayload } = require("@vinceau/slp-realtime");
 
 // TODO: Make sure you set this value!
-const slpLiveFolderPath = "C:\\Emulation\\Emulatoren\\Slippi Online\\Slippi";
-console.log(`Monitoring ${slpLiveFolderPath} for new SLP files`);
+var slpLiveFolderPath = "C:\\Emulation\\Emulatoren\\Slippi Online\\Slippi";
 // TODO: Make sure you set these values!
 // Connect to the relay
 
@@ -272,10 +281,8 @@ ipc.on('start', (event, lolistgut) => {
 
   } else {
   realtime.setStream(stream);
-  console.log(lolistgut[2]);
-  console.log(lolistgut);
   stream.start(lolistgut[2]);
-    console.log("starting monitoring!");
+  slpLiveFolderPath = lolistgut[2];
 
   }
 })
@@ -283,3 +290,50 @@ ipc.on('end', (event, arg) => {
 stream.stop();
 stream2.stop();
 })
+
+//Rest API
+function getStats(games){
+  var files = fs.readdirSync(slpLiveFolderPath, [])
+  .map(function(v) {
+    return { name:v };
+  })
+  .filter(files => files.name.endsWith('.slp'))
+  console.log(files);
+  files = files.sort(function(a, b) {
+    var fest;
+    var yuio;
+    const gamer = new SlippiGame(slpLiveFolderPath + "\\" +  a.name);
+    const gamet = new SlippiGame(slpLiveFolderPath + "\\" +  b.name);
+    if (gamer.getMetadata() == null)
+      fest = "1";
+    else
+      fest = gamer.getMetadata().startAt;
+
+    if (gamet.getMetadata() == null)
+      yuio = "1";
+    else
+      yuio = gamet.getMetadata().startAt;
+    return yuio.replace(/\D/g,'') - fest.replace(/\D/g,'');
+  })
+  .map(function(v) { return slpLiveFolderPath + "\\" +  v.name; });
+var stats = { stats: [], settings: [], metadata: []};
+
+for (var i = 0; i < parseInt(games, 10); i++) {
+  const gamez = new SlippiGame(files[i]);
+  stats.stats[parseInt(games, 10) - i - 1] = gamez.getStats()
+  stats.settings[parseInt(games, 10) - i - 1] = gamez.getSettings()
+  stats.metadata[parseInt(games, 10) - i - 1] = gamez.getMetadata()
+}
+return stats
+}
+
+var app2 = express();
+app2.listen(3000, () => {
+ console.log("Server running on port 3000");
+});
+
+app2.get("/game/:game", (req, res,) => {
+  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you
+ res.json(getStats(req.params.game));
+});

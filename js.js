@@ -6,7 +6,7 @@ const app = remote.app;
 var foldervar;
 var relay;
 var decision;
-
+var AutoLaunch = require('auto-launch');
 var leftcolor = 0;
 var rightcolor = 0;
 var updating2 = false;
@@ -15,6 +15,28 @@ var chromaSDK = undefined;
 var ingame = false;
 var updating3 = false;
 var key = new Array(22);
+var autohide = false;
+var razervalue;
+var autoLauncher = new AutoLaunch({
+    name: 'Slippi Chroma',
+});
+autoLauncher.isEnabled()
+.then(function(isEnabled){
+    if(isEnabled){
+      console.log("autostart an")
+        document.getElementById("autostart").checked = true
+    }
+})
+
+function autostarting(checked){
+    if(checked == true){
+        autoLauncher.enable();
+    } else {
+        autoLauncher.disable();
+
+    }
+
+}
 function onPageLoad() {
   chromaSDK = new ChromaSDK();
   var oReq = new XMLHttpRequest();
@@ -423,6 +445,9 @@ setTimeout(function(){
                                     updating = false;
                                     updating3 = false;
                                     ingame = false;
+                                    if (autohide == true) {
+                                      chromaSDK.uninit();
+                                    }
                                   }, 200);
                                   }
                                 }, 200);
@@ -611,6 +636,9 @@ setTimeout(function(){
             rightcolor = data.rightcolor[0] + data.rightcolor[1] * 256 + data.rightcolor[2] * 65536;
             piioleftcolor = data.leftcolor;
             piiorightcolor = data.rightcolor;
+            if (autohide == true) {
+              chromaSDK.init();
+            }
             if (data.event == "start") {
               for (var i = 0; i <= 10; i++) {
               changecolor(i);
@@ -672,17 +700,37 @@ setTimeout(function(){
 function checkbox(checked){
 fs.writeFile( app.getPath('userData') + '\\saves\\razer.txt', checked.toString(), function(err, result) {
  if(err) console.log('error', err);
+ razervalue = checked
  console.log('write file folder', err);
 });
-if (checked == true) {
+setTimeout(function(){
+if ((checked == true && autohide == false) || (checked == true && ingame == true)) {
 
    chromaSDK.init();
    console.log("chroma started");
-} else {
+} else if (ingame == false || checked == false){
  chromaSDK.uninit();
 
+}}, 10)
 }
-}
+
+
+function autohider(checked){
+fs.writeFile( app.getPath('userData') + '\\saves\\autohide.txt', checked.toString(), function(err, result) {
+  if(err) console.log('error', err);
+  });
+  }
+  function autohideing(checked){
+  fs.writeFile( app.getPath('userData') + '\\saves\\autohideing.txt', checked.toString(), function(err, result) {
+    if(err) console.log('error', err);
+    autohide = checked;
+    checkbox(razervalue);
+
+      console.log('write file folder', err);
+    });
+    }
+
+
 
     function changecolor(i){
       var time = 20 * i;
@@ -706,7 +754,7 @@ if (checked == true) {
        if (value.includes('.')) {
        value = value.substr(0, value.lastIndexOf("\\"));
        }
-      foldervar = data;
+      foldervar = value;
       document.getElementById("folder").value = value;
      fs.writeFile( app.getPath('userData') + '\\saves\\folder.txt', value, function(err, result) {
      if(err) console.log('error', err);
@@ -752,15 +800,33 @@ if (checked == true) {
       document.getElementById("relayPort").value = relay;
     });
 
+
     fs.readFile( app.getPath('userData') + '\\saves\\razer.txt', 'utf8', function (err, data) {
       if (data == "true") {
         document.getElementById("lol").checked = true;
         checkbox(true);
+        razervalue = true
       } else {
         document.getElementById("lol").checked = false;
         checkbox(false);
+        razervalue = false
       }
     });
+    fs.readFile( app.getPath('userData') + '\\saves\\autohide.txt', 'utf8', function (err, data) {
+      if(err) console.log('error', err);
+      if (data == "true") {
+        document.getElementById("autohide").checked = true;
+      }
+    });
+    fs.readFile( app.getPath('userData') + '\\saves\\autohideing.txt', 'utf8', function (err, data) {
+      if(err) console.log('error', err);
+      if (data == "true") {
+        document.getElementById("autohideing").checked = true;
+        autohide = true;
+      }
+    });
+
+
 
     fs.readFile( app.getPath('userData') + '\\saves\\folder.txt', 'utf8', function (err, data) {
     foldervar = data;
@@ -781,6 +847,9 @@ if (checked == true) {
       if (data == "true") {
         start();
         document.getElementById("auto").checked = true;
+        if (true) {
+
+        }
       } else {
         document.getElementById('startbutton').style.display = 'block';
           document.getElementById('stopbutton').style.display = 'none';
@@ -789,11 +858,6 @@ if (checked == true) {
     });
     });
 
-    function auto(value){
-      fs.writeFile( app.getPath('userData') + '\\saves\\auto.txt', value.toString(), function(err, result) {
-        if(err) console.log('error', err);
-      });
-  }
 
 function start(){
   var value = {

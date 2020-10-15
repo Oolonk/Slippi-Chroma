@@ -59,8 +59,8 @@ ChromaSDK.prototype = {
       request.setRequestHeader("content-type", "application/json");
 
       var data = JSON.stringify({
-          "title": "RazerXMelee",
-          "description": "Razer Chroma syncs up with Smash Scoreboard",
+          "title": "Slippi Chroma",
+          "description": "Razer Chroma syncs up with Smash Bros. Melee",
           "author": {
               "name": "Jonas Hartmer",
               "contact": "https://twitter.com/RDF_Dortimus51"
@@ -72,7 +72,7 @@ ChromaSDK.prototype = {
               "mousepad",
               "keypad",
               "chromalink"],
-          "category": "application"
+          "category": "game"
       });
 
       request.send(data);

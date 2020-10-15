@@ -1,12 +1,12 @@
 {
 	"name": "RAZERxSLIPPI",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Slippi relay for Razer Chroma",
 	"license": "MIT",
 	"author": "Oolonk",
 	"main": "index.js",
 	"scripts": {
-		"start": "electron . ",
+		"start": "electron .",
 		"pack": "build --dir",
 		"dist": "electron-builder"
 	},
@@ -25,13 +25,17 @@
 		}
 	},
 	"devDependencies": {
-		"electron": "^9.0.5",
-		"electron-builder": "^22.7.0"
+		"electron": "^9.3.2",
+		"electron-builder": "^22.8.1"
 	},
 	"dependencies": {
-		"@vinceau/slp-realtime": "2.3.7",
-		"electron-packager": "^15.0.0",
+		"@slippi/slippi-js": "^5.0.5",
+		"@vinceau/slp-realtime": "3.0.2",
+		"auto-launch": "^5.0.5",
+		"electron-packager": "^15.1.0",
+		"express": "^4.17.1",
 		"fs": "0.0.1-security",
+		"rxjs": "^6.6.3",
 		"ws": "^7.3.0"
 	},
 	"private": true
