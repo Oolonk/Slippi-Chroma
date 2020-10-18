@@ -10,7 +10,7 @@ const WebSocket = require("ws")
 var payloadvar;
 const { tap, map, filter } = require("rxjs/operators")
 function createWindow() {
-    let win = new BrowserWindow({ backgroundColor: '#2e2c29', width: 1200, height: 700, icon:  __dirname + '\\script\\icon.ico', frame: true, resizable : false,webPreferences: {nodeIntegration: true}})
+    let win = new BrowserWindow({ backgroundColor: '#2e2c29', width: 1200, height: 700, icon:  __dirname + '\\script\\icon.ico', frame: true, resizable : false,webPreferences: {nodeIntegration: true, backgroundThrottling: false}})
     win.setMenuBarVisibility(false)
     win.loadURL(url.format({
         pathname: path.join( __dirname + '\\index.html'),
@@ -59,7 +59,8 @@ function createWindow() {
 }
 
 app.commandLine.appendSwitch("disable-gpu")
-
+app.commandLine.appendSwitch("disable-renderer-backgrounding");
+app.commandLine.appendSwitch("disable-raf-throttling");
 app.on('ready', createWindow)
 
   /*
